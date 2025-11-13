@@ -431,6 +431,7 @@ export default function ConfigMenu(props: ConfigMenuProps) {
                                   <label class="text-sm col-span-2">
                                     <div class="mb-1 text-neutral-400">
                                       Color Theme
+                                    </div>
                                     <select
                                       class="w-full rounded bg-neutral-900 px-2 py-1 text-sm"
                                       value={(col.components[compIdx()].options as any)?.colorTheme || "iris"}
