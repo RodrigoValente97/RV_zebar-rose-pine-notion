@@ -18,6 +18,7 @@ type ComponentType =
   | "datetime"
   | "rss"
   | "wm"
+  | "notion"
   | "systray";
 
 interface ConfigMenuProps {
@@ -72,6 +73,7 @@ export default function ConfigMenu(props: ConfigMenuProps) {
     "rss",
     "wm",
     "systray",
+    "notion",
   ];
 
   const persistIfNeeded = (next: Layout) => {
@@ -424,6 +426,54 @@ export default function ConfigMenu(props: ConfigMenuProps) {
                                       <For each={availableComponents}>
                                         {(t) => <option value={t}>{t}</option>}
                                       </For>
+                                    </select>
+                                  </label>
+                                  <label class="text-sm col-span-2">
+                                    <div class="mb-1 text-neutral-400">
+                                      Color Theme
+                                    <select
+                                      class="w-full rounded bg-neutral-900 px-2 py-1 text-sm"
+                                      value={(col.components[compIdx()].options as any)?.colorTheme || "iris"}
+                                      onChange={(e) => {
+                                        const currentOptions = col.components[compIdx()].options as any || {};
+                                        const newOptions = {
+                                          ...currentOptions,
+                                          colorTheme: e.currentTarget.value
+                                        };
+                                        setComponentOptions(idx, compIdx(), JSON.stringify(newOptions, null, 2));
+                                        setLocalOptions((prev) => ({
+                                          ...prev,
+                                          [compKey]: JSON.stringify(newOptions, null, 2),
+                                        }));
+                                      }}
+                                    >
+                                      <optgroup label="Base Colors">
+                                        <option value="text">Text</option>
+                                        <option value="love">Love</option>
+                                        <option value="gold">Gold</option>
+                                        <option value="rose">Rose</option>
+                                        <option value="pine">Pine</option>
+                                        <option value="foam">Foam</option>
+                                        <option value="iris">Iris</option>
+                                      </optgroup>
+                                      <optgroup label="Moon Variants">
+                                        <option value="moon-text">Moon Text</option>
+                                        <option value="moon-love">Moon Love</option>
+                                        <option value="moon-gold">Moon Gold</option>
+                                        <option value="moon-rose">Moon Rose</option>
+                                        <option value="moon-pine">Moon Pine</option>
+                                        <option value="moon-foam">Moon Foam</option>
+                                        <option value="moon-iris">Moon Iris</option>
+                                      </optgroup>
+                                      <optgroup label="Dawn Variants">
+                                        <option value="dawn-text">Dawn Text</option>
+                                        <option value="dawn-love">Dawn Love</option>
+                                        <option value="dawn-gold">Dawn Gold</option>
+                                        <option value="dawn-rose">Dawn Rose</option>
+                                        <option value="dawn-pine">Dawn Pine</option>
+                                        <option value="dawn-foam">Dawn Foam</option>
+                                        <option value="dawn-iris">Dawn Iris</option>
+                                      </optgroup>
                                     </select>
                                   </label>
                                   <label class="text-sm col-span-2">

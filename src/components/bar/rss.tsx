@@ -31,6 +31,9 @@ export type RssOptions = {
   maxAge?: number;
   cleanupInterval?: number;
   corsProxyUrl?: string;
+  colorTheme?: "text" | "love" | "gold" | "rose" | "pine" | "foam" | "iris" |
+              "moon-text" | "moon-love" | "moon-gold" | "moon-rose" | "moon-pine" | "moon-foam" | "moon-iris" |
+              "dawn-text" | "dawn-love" | "dawn-gold" | "dawn-rose" | "dawn-pine" | "dawn-foam" | "dawn-iris";
 };
 
 export const RssSchema = z.object({
@@ -48,6 +51,11 @@ export const RssSchema = z.object({
   maxAge: z.number().optional(),
   cleanupInterval: z.number().optional(),
   corsProxyUrl: z.string().optional(),
+  colorTheme: z.enum([
+    "text", "love", "gold", "rose", "pine", "foam", "iris",
+    "moon-text", "moon-love", "moon-gold", "moon-rose", "moon-pine", "moon-foam", "moon-iris",
+    "dawn-text", "dawn-love", "dawn-gold", "dawn-rose", "dawn-pine", "dawn-foam", "dawn-iris"
+  ]).optional(),
 });
 
 const SEEN_STORAGE_KEY = "zrp:rss:seen";
@@ -165,6 +173,43 @@ export default function Rss(props: { options?: { [key: string]: any } }) {
   const cleanupInterval = () => options().cleanupInterval ?? 30;
   const corsProxyUrl = () =>
     options().corsProxyUrl ?? "https://corsproxy.io/?url=";
+  const colorTheme = () => options().colorTheme ?? "gold";
+
+  // Function to get color variables based on theme
+  const getColorVariables = (theme: string) => {
+    const colorMap: Record<string, string> = {
+      // Base colors
+      text: "var(--rp-text)",
+      love: "var(--rp-love)",
+      gold: "var(--rp-gold)",
+      rose: "var(--rp-rose)",
+      pine: "var(--rp-pine)",
+      foam: "var(--rp-foam)",
+      iris: "var(--rp-iris)",
+      // Moon variants
+      "moon-text": "var(--rp-moon-text)",
+      "moon-love": "var(--rp-moon-love)",
+      "moon-gold": "var(--rp-moon-gold)",
+      "moon-rose": "var(--rp-moon-rose)",
+      "moon-pine": "var(--rp-moon-pine)",
+      "moon-foam": "var(--rp-moon-foam)",
+      "moon-iris": "var(--rp-moon-iris)",
+      // Dawn variants
+      "dawn-text": "var(--rp-dawn-text)",
+      "dawn-love": "var(--rp-dawn-love)",
+      "dawn-gold": "var(--rp-dawn-gold)",
+      "dawn-rose": "var(--rp-dawn-rose)",
+      "dawn-pine": "var(--rp-dawn-pine)",
+      "dawn-foam": "var(--rp-dawn-foam)",
+      "dawn-iris": "var(--rp-dawn-iris)"
+    };
+    return colorMap[theme] || colorMap["gold"];
+  };
+
+  // Create a style object for the color theme
+  const themeStyle = () => ({
+    "--rss": getColorVariables(colorTheme())
+  });
 
   const feeds = createMemo(() =>
     (options().feeds ?? []).filter((feed) => feed.url)
@@ -267,6 +312,7 @@ export default function Rss(props: { options?: { [key: string]: any } }) {
         "h-8 w-8 rounded-full flex items-center justify-center select-none",
         "text-[var(--rss)] bg-[var(--rss)]/10 hover:bg-[var(--rss)]/20 transition-colors"
       )}
+      style={themeStyle()}
       title="RSS"
       onClick={openRssWindow}
     >

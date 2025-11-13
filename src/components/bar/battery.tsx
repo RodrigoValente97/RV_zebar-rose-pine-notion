@@ -1,12 +1,63 @@
-import { cn } from "../../lib/utils";
+import { cn, validateOptions } from "../../lib/utils";
 import { Match, Show, Switch } from "solid-js/web";
 import { createEffect, createSignal } from "solid-js";
 import { useProviders } from "../../lib/providers-context";
+import z from "zod";
 
-function Battery() {
+export const BatterySchema = z.object({
+  colorTheme: z.enum([
+    "text", "love", "gold", "rose", "pine", "foam", "iris",
+    "moon-text", "moon-love", "moon-gold", "moon-rose", "moon-pine", "moon-foam", "moon-iris",
+    "dawn-text", "dawn-love", "dawn-gold", "dawn-rose", "dawn-pine", "dawn-foam", "dawn-iris"
+  ]).optional(),
+});
+
+function Battery(props: { options?: { [key: string]: any } } = {}) {
   const { battery } = useProviders();
   const [batterySig, setBatterySig] = createSignal(battery());
   createEffect(() => setBatterySig(battery()));
+
+  const options = () => validateOptions(props.options ?? {}, BatterySchema);
+  const colorTheme = () => options().colorTheme ?? "rose";
+
+  // Function to get color variables based on theme
+  const getColorVariables = (theme: string) => {
+    const colorMap: Record<string, string> = {
+      // Base colors
+      text: "var(--rp-text)",
+      love: "var(--rp-love)",
+      gold: "var(--rp-gold)",
+      rose: "var(--rp-rose)",
+      pine: "var(--rp-pine)",
+      foam: "var(--rp-foam)",
+      iris: "var(--rp-iris)",
+      // Moon variants
+      "moon-text": "var(--rp-moon-text)",
+      "moon-love": "var(--rp-moon-love)",
+      "moon-gold": "var(--rp-moon-gold)",
+      "moon-rose": "var(--rp-moon-rose)",
+      "moon-pine": "var(--rp-moon-pine)",
+      "moon-foam": "var(--rp-moon-foam)",
+      "moon-iris": "var(--rp-moon-iris)",
+      // Dawn variants
+      "dawn-text": "var(--rp-dawn-text)",
+      "dawn-love": "var(--rp-dawn-love)",
+      "dawn-gold": "var(--rp-dawn-gold)",
+      "dawn-rose": "var(--rp-dawn-rose)",
+      "dawn-pine": "var(--rp-dawn-pine)",
+      "dawn-foam": "var(--rp-dawn-foam)",
+      "dawn-iris": "var(--rp-dawn-iris)"
+    };
+    return colorMap[theme] || colorMap["rose"];
+  };
+
+  // Create a style object for the color theme
+  const themeStyle = () => ({
+    "--battery": getColorVariables(colorTheme()),
+    "--battery-low": getColorVariables(colorTheme()),
+    "--battery-mid": getColorVariables(colorTheme()),
+    "--battery-good": getColorVariables(colorTheme())
+  });
 
   const [isAnimating, setIsAnimating] = createSignal(false);
 
@@ -32,6 +83,7 @@ function Battery() {
               batterySig()!.isCharging,
           }
         )}
+        style={themeStyle()}
       >
         <Switch>
           <Match

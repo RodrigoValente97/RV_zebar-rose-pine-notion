@@ -1,11 +1,69 @@
-import { cn } from "../../lib/utils";
-import { Match, Show, Switch, createEffect, createSignal } from "solid-js";
+import { cn, validateOptions } from "../../lib/utils";
+import { Match, Show, Switch, createEffect, createMemo, createSignal } from "solid-js";
 import { useProviders } from "../../lib/providers-context";
+import z from "zod";
 
-function Media() {
+export const MediaSchema = z.object({
+  colorTheme: z.enum([
+    "text", "love", "gold", "rose", "pine", "foam", "iris",
+    "moon-text", "moon-love", "moon-gold", "moon-rose", "moon-pine", "moon-foam", "moon-iris",
+    "dawn-text", "dawn-love", "dawn-gold", "dawn-rose", "dawn-pine", "dawn-foam", "dawn-iris"
+  ]).optional(),
+});
+
+function Media(props: { options?: { [key: string]: any } } = {}) {
   const { media } = useProviders();
   const [mediaSig, setMediaSig] = createSignal(media());
-  createEffect(() => setMediaSig(media()));
+  
+  // Update local signal when provider changes, ensuring new reference for reactivity
+  createEffect(() => {
+    const currentMedia = media();
+    if (currentMedia) {
+      // Clone to ensure Solid detects changes even if provider mutates same object
+      setMediaSig({ ...currentMedia });
+    } else {
+      setMediaSig(undefined);
+    }
+  });
+
+  const options = () => validateOptions(props.options ?? {}, MediaSchema);
+  const colorTheme = () => options().colorTheme ?? "rose";
+
+  // Function to get color variables based on theme
+  const getColorVariables = (theme: string) => {
+    const colorMap: Record<string, string> = {
+      // Base colors
+      text: "var(--rp-text)",
+      love: "var(--rp-love)",
+      gold: "var(--rp-gold)",
+      rose: "var(--rp-rose)",
+      pine: "var(--rp-pine)",
+      foam: "var(--rp-foam)",
+      iris: "var(--rp-iris)",
+      // Moon variants
+      "moon-text": "var(--rp-moon-text)",
+      "moon-love": "var(--rp-moon-love)",
+      "moon-gold": "var(--rp-moon-gold)",
+      "moon-rose": "var(--rp-moon-rose)",
+      "moon-pine": "var(--rp-moon-pine)",
+      "moon-foam": "var(--rp-moon-foam)",
+      "moon-iris": "var(--rp-moon-iris)",
+      // Dawn variants
+      "dawn-text": "var(--rp-dawn-text)",
+      "dawn-love": "var(--rp-dawn-love)",
+      "dawn-gold": "var(--rp-dawn-gold)",
+      "dawn-rose": "var(--rp-dawn-rose)",
+      "dawn-pine": "var(--rp-dawn-pine)",
+      "dawn-foam": "var(--rp-dawn-foam)",
+      "dawn-iris": "var(--rp-dawn-iris)"
+    };
+    return colorMap[theme] || colorMap["rose"];
+  };
+
+  // Create a style object for the color theme
+  const themeStyle = () => ({
+    "--media": getColorVariables(colorTheme())
+  });
 
   return (
     <Show when={mediaSig()}>
@@ -13,33 +71,34 @@ function Media() {
         class={cn(
           "h-8 flex group items-center justify-center overflow-hidden gap-2 text-[var(--media)] bg-[var(--media)]/10 rounded-full pr-3 pl-4 relative"
         )}
+        style={themeStyle()}
       >
         <Switch>
-          <Match when={mediaSig()!.currentSession.isPlaying}>
+          <Match when={mediaSig()?.currentSession?.isPlaying}>
             <i class="nf nf-md-music text-lg"></i>
           </Match>
-          <Match when={!mediaSig()!.currentSession.isPlaying}>
+          <Match when={!mediaSig()?.currentSession?.isPlaying}>
             <i class="nf nf-md-music_off text-lg"></i>
           </Match>
         </Switch>
         <div class="flex items-center gap-2 group-hover:translate-y-6 group-hover:opacity-0 transition-all duration-300">
           <div class="flex items-center gap-1">
-            <span class="text-sm">{mediaSig()!.currentSession.artist}</span>
+            <span class="text-sm">{mediaSig()?.currentSession?.artist ?? ""}</span>
             <span class="text-sm">-</span>
             <span class="text-sm">
-              {mediaSig()!.currentSession.title.slice(0, 25).trim() +
-                (mediaSig()!.currentSession.title.length > 25 ? "..." : "")}
+              {(mediaSig()?.currentSession?.title ?? "").slice(0, 25).trim() +
+                ((mediaSig()?.currentSession?.title?.length ?? 0) > 25 ? "..." : "")}
             </span>
           </div>
           <div class="w-12 h-2 bg-[var(--media)]/40 rounded-full relative overflow-hidden">
             <div
               class="h-full bg-[var(--media)] rounded-full"
               style={{
-                width: `${
-                  (mediaSig()!.currentSession.position /
-                    mediaSig()!.currentSession.endTime) *
-                  100
-                }%`,
+                width: `${(() => {
+                  const s = mediaSig()?.currentSession;
+                  if (!s || !s.endTime) return 0;
+                  return Math.min(100, Math.max(0, (s.position / s.endTime) * 100));
+                })()}%`,
               }}
             ></div>
           </div>
@@ -47,39 +106,39 @@ function Media() {
         <div class="transition-all -translate-y-6 duration-300 opacity-0 group-hover:opacity-100 group-hover:translate-y-0 absolute left-12 right-0 w-auto">
           <div class="flex flex-1 w-full h-full text-lg items-center gap-1 justify-between">
             <button
-              onClick={() => mediaSig()!.previous()}
+              onClick={() => mediaSig()?.previous?.()}
               class="flex-1 min-w-0 w-full h-8 aspect-square hover:bg-current/10 rounded-full flex items-center justify-center transition-all duration-300"
             >
               <i class="ti ti-player-skip-back text-xl"></i>
             </button>
             <button
-              onClick={() => mediaSig()!.pause()}
+              onClick={() => mediaSig()?.pause?.()}
               class={cn(
                 "flex-1 min-w-0 w-full h-8 aspect-square hover:bg-current/10 rounded-full transition-all duration-300",
                 {
-                  hidden: !mediaSig()!.currentSession.isPlaying,
+                  hidden: !mediaSig()?.currentSession?.isPlaying,
                   "flex items-center justify-center":
-                    mediaSig()!.currentSession.isPlaying,
+                    !!mediaSig()?.currentSession?.isPlaying,
                 }
               )}
             >
               <i class="ti ti-player-pause text-xl"></i>
             </button>
             <button
-              onClick={() => mediaSig()!.play()}
+              onClick={() => mediaSig()?.play?.()}
               class={cn(
                 "flex-1 min-w-0 w-full h-8 aspect-square hover:bg-current/10 rounded-full transition-all duration-300",
                 {
-                  hidden: mediaSig()!.currentSession.isPlaying,
+                  hidden: !!mediaSig()?.currentSession?.isPlaying,
                   "flex items-center justify-center":
-                    !mediaSig()!.currentSession.isPlaying,
+                    !mediaSig()?.currentSession?.isPlaying,
                 }
               )}
             >
               <i class="ti ti-player-play text-xl"></i>
             </button>
             <button
-              onClick={() => mediaSig()!.next()}
+              onClick={() => mediaSig()?.next?.()}
               class="flex-1 min-w-0 w-full h-8 aspect-square hover:bg-current/10 rounded-full flex items-center justify-center transition-all duration-300"
             >
               <i class="ti ti-player-skip-forward text-xl"></i>
