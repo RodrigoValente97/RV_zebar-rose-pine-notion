@@ -39,7 +39,7 @@
   --rp-moon-highlight-high: #56526e;
 
   --rp-dawn-base: #faf4ed;
-  --rp-dawn-base-alpha-bg: #faf4ed
+  --rp-dawn-base-alpha-bg: #faf4ed;
   --rp-dawn-surface: #fffaf3;
   --rp-dawn-overlay: #f2e9e1;
   --rp-dawn-muted: #9893a5;
@@ -59,16 +59,17 @@
   --bg: var(--rp-base-alpha-bg);
   --border: var(--rp-base);
   --icon: var(--rp-love);
-  --memory: var(--rp-gold);
+  --memory: var(--rp-rose);
   --cpu: var(--rp-rose);
   --cpu-high-usage: var(--rp-love);
   --battery: var(--rp-foam);
   --battery-good: var(--rp-foam);
   --battery-mid: var(--rp-gold);
   --battery-low: var(--rp-love);
-  --media: var(--rp-iris);
+  --media: var(--rp-pine);
   --network: var(--rp-pine);
   --rss: var(--rp-gold);
+  --notion: var(--rp-iris);
   --ws-1: var(--rp-love);
   --ws-2: var(--rp-gold);
   --ws-3: var(--rp-rose);
@@ -81,33 +82,27 @@
   --weather: var(--rp-foam);
 }
 
-@theme {
-  --animate-flash: flash 1s infinite;
-  @keyframes flash {
-      from { opacity: 1.0; }
-      50% { opacity: 0.5; }
-      to { opacity: 1.0; }
-  }
+@keyframes flash {
+  from { opacity: 1.0; }
+  50% { opacity: 0.5; }
+  to { opacity: 1.0; }
+}
 
-  
-  --animate-charging: battery-charge 2.1s ease-in-out infinite;
-  --battery-percent: var(--tw-battery-width, 0%);
-  @keyframes battery-charge {
-    0% {
-      width: var(--tw-battery-width);
-    }
-    10% {
-      width: var(--tw-battery-width);
-    }
-    60% {
-      width: 100%;
-    }
-    99% {
-      width: 100%;
-    }
-    100% {
-      width: var(--tw-battery-width);
-    }
+@keyframes battery-charge {
+  0% {
+    width: var(--tw-battery-width);
+  }
+  10% {
+    width: var(--tw-battery-width);
+  }
+  60% {
+    width: 100%;
+  }
+  99% {
+    width: 100%;
+  }
+  100% {
+    width: var(--tw-battery-width);
   }
 }
 

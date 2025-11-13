@@ -5,6 +5,7 @@ import { createSignal, Show } from "solid-js";
 import Base, { Layout } from "./base";
 import ConfigMenu from "./components/config-menu";
 import RssWindow from "./components/rss-window";
+import NotionWindow from "./components/NotionWindow";
 
 const defaultLayout: Layout = {
   topMargin: 4,
@@ -14,43 +15,23 @@ const defaultLayout: Layout = {
       align: "left",
       width: 1,
       components: [
-        {
-          type: "direction",
-        },
-        {
-          type: "memory",
-        },
-        {
-          type: "cpu",
-        },
-        {
-          type: "battery",
-        },
+        { type: "direction" },
+        { type: "memory" },
+        { type: "cpu" },
+        { type: "battery" },
       ],
     },
     {
       align: "center",
       width: "auto",
       components: [
-        {
-          type: "wm",
-        },
+        { type: "wm" },
         {
           type: "rss",
           options: {
             feeds: [
-              {
-                url: "https://hnrss.org/frontpage",
-                maxItems: 20,
-                maxAge: 7,
-                useCorsProxy: false,
-              },
-              {
-                url: "https://www.reddit.com/r/programming/.rss",
-                maxItems: 40,
-                maxAge: 14,
-                useCorsProxy: true,
-              },
+              { url: "https://hnrss.org/frontpage", maxItems: 20, maxAge: 7, useCorsProxy: false },
+              { url: "https://www.reddit.com/r/programming/.rss", maxItems: 40, maxAge: 14, useCorsProxy: true },
             ],
             refreshInterval: 300000,
             maxItemsPerFeed: 30,
@@ -61,21 +42,25 @@ const defaultLayout: Layout = {
             corsProxyUrl: "https://corsproxy.io/?url=",
           },
         },
+        {
+          type: "notion",
+          options: {
+            notionToken: "ntn_A65535527035PshUBiUul4Mp69W6QMR7KtWcXjXgg9G5ix",
+            databaseId: "6a1d9631a834412aa1ac0f52f212df1f",
+            refreshInterval: 300000,
+            useCorsProxy: true,
+            corsProxyUrl: "https://corsproxy.io/?url=",
+          },
+        },
       ],
     },
     {
       align: "right",
       width: 1,
       components: [
-        {
-          type: "media",
-        },
-        {
-          type: "network",
-        },
-        {
-          type: "datetime",
-        },
+        { type: "media" },
+        { type: "network" },
+        { type: "datetime" },
       ],
     },
   ],
@@ -93,17 +78,25 @@ function App() {
 
   const [layout, setLayout] = createSignal<Layout>(initial);
   const searchParams = new URLSearchParams(window.location.search);
+
   const [configOpen, setConfigOpen] = createSignal(searchParams.has("config"));
   const [rssOpen, setRssOpen] = createSignal(searchParams.has("rss"));
+  const [notionOpen, setNotionOpen] = createSignal(searchParams.has("notion"));
 
   return (
     <>
       <Show when={rssOpen()}>
-        <RssWindow />
+        <RssWindow wm="glazewm" />
       </Show>
-      <Show when={!configOpen() && !rssOpen()}>
+
+      <Show when={notionOpen()}>
+        <NotionWindow wm="glazewm" />
+      </Show>
+
+      <Show when={!configOpen() && !rssOpen() && !notionOpen()}>
         <Base wm="glazewm" layout={layout()} setLayout={setLayout} />
       </Show>
+
       <ConfigMenu
         layout={layout()}
         onChange={setLayout}

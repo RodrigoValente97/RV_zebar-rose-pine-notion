@@ -12,6 +12,7 @@ import Komorebi from "./components/bar/komorebi";
 import { cn } from "./lib/utils";
 import { ProvidersProvider } from "./lib/providers-context";
 import Rss from "./components/bar/rss";
+import NotionTodo from "./components/bar/NotionTodo";
 
 export interface Layout {
   topMargin: number;
@@ -30,6 +31,7 @@ export interface Layout {
         | "network"
         | "datetime"
         | "rss"
+        | "notion"
         | "wm"
         | "systray";
       options?: { [key: string]: any };
@@ -125,28 +127,31 @@ const Base = (props: {
                         <Komorebi />
                       </Match>
                       <Match when={component().type === "direction"}>
-                        <Direction />
+                        <Direction options={component().options} />
                       </Match>
                       <Match when={component().type === "memory"}>
-                        <Memory />
+                        <Memory options={component().options} />
                       </Match>
                       <Match when={component().type === "cpu"}>
-                        <Cpu />
+                        <Cpu options={component().options} />
                       </Match>
                       <Match when={component().type === "battery"}>
-                        <Battery />
+                        <Battery options={component().options} />
                       </Match>
                       <Match when={component().type === "media"}>
-                        <Media />
+                        <Media options={component().options} />
                       </Match>
                       <Match when={component().type === "network"}>
-                        <Network />
+                        <Network options={component().options} />
                       </Match>
                       <Match when={component().type === "datetime"}>
-                        <Datetime />
+                        <Datetime noIcon={component().options?.noIcon} options={component().options} />
                       </Match>
                       <Match when={component().type === "rss"}>
                         <Rss options={component().options} />
+                      </Match>
+                      <Match when={component().type === "notion"}>
+                        <NotionTodo options={component().options} />
                       </Match>
                     </Switch>
                   )}
